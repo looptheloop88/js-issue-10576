@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Auth Initialization Delay Repro</title>
+</head>
+
+<body>
+    <h1>Auth Initial Load Time Test</h1>
+    <p id="status">Initializing...</p>
+
+    <script type="module">
+        import {initializeApp} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-app.js";
+        import {getAuth, onAuthStateChanged, signInAnonymously} from "https://www.gstatic.com/firebasejs/12.11.0/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "<YOUR_API_KEY>",
+          authDomain: "<YOUR_AUTH_DOMAIN>",
+          projectId: "<YOUR_PROJECT_ID>",
+          storageBucket: "<YOUR_STORAGE_BUCKET>",
+          messagingSenderId: "<YOUR_MESSAGING_SENDER_ID>",
+          appId: "<YOUR_APP_ID>"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        const startTime = performance.now();
+
+        onAuthStateChanged(auth, async (user) => {
+            const loadTime = performance.now() - startTime;
+            document.getElementById('status').innerText =
+                `Auth State Ready. User: ${user ? 'Signed In' : 'Signed Out'} (Load time: ${Math.round(loadTime)}ms)`;
+
+            if (!user) {
+                await signInAnonymously(auth);
+                console.log("Signed in anonymously. Please refresh the page to test cached load times.");
+            }
+        });
+    </script>
+</body>
+
+</html>
